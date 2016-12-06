@@ -31,7 +31,7 @@ class Game
 		
 		puts "#{@mr_hangman.red}\n\n"
 		puts "          #{@visible_word}\n\n"
-		puts " #{@most_recent_guess}\n\n"	
+		puts "---------------\n #{@most_recent_guess}\n---------------\n"	
 		print "\n#{@guessed_letters}\n\n"
 	end
 	
@@ -57,7 +57,7 @@ class Game
 			@game_over=true
 			@game_over_message = "You are a winner!!!"
 			self.draw_board
-		end		
+		end			
 	end
 	
 	def check_turns
@@ -67,7 +67,7 @@ class Game
 		end
 	end
 	
-	def compare_guess(guess)		
+	def compare_guess(guess)	
 		@the_word.length.times{|x|
 		if @the_word[x-1].downcase == guess.downcase
 			@visible_word[x-1] = guess
@@ -76,14 +76,59 @@ class Game
 		}		
 	end
 	
+	def save?
+		puts "Would you like to save this game?"
+		save_answer = gets.chomp
+		if save_answer.downcase == "y" || save_answer.downcase == "yes"
+			puts "What do you want to name your save?"
+			save_game(gets.chomp)
+		end
+		self.draw_board	
+	end
+	
+	def save_game(save_name)
+		save = "#{save_name}.txt"
+		save_file = File.open(save, "w")
+		save_file.puts @the_word
+		save_file.puts @visible_word
+		save_file.puts @failed_guesses
+		save_file.puts @guessed_letters
+		save_file.close
+		puts "Game state saved..."
+	end
+	
+	def load_game(file_name)
+		file = File.open("#{file_name}.txt", "r")
+		@the_word = file.readline
+		@visible_word = file.readline
+		@failed_guesses = file.readline.to_i
+		while !file.eof?
+			@guessed_letters.push(file.readline.chomp)
+		end
+		
+		@failed_guesses.times{|x| @mr_hangman << @mr_hangman_array[x] }
+		puts "#{@the_word},#{@visible_word},#{@failed_guesses},#{@guessed_letters}"
+		gets
+	end
 end
 
 game = Game.new
+
+#Ask to load game
+puts "Would you like to load a game?"
+save_answer = gets.chomp
+if save_answer.downcase == "y" || save_answer.downcase == "yes"
+	puts "What is the name of your save?"
+	game.load_game(gets.chomp)
+end
+
 #Main game loop
 while game.game_over == false	
 	game.draw_board	
 	game.player_turn
-	game.check_turns	 	
+	game.check_turns
+	game.draw_board
+	game.save?	
 end
 game.draw_board
 puts "\n#{game.game_over_message}"
