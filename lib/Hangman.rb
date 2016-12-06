@@ -33,6 +33,19 @@ class Game
 		puts "          #{@visible_word}\n\n"
 		puts "---------------\n #{@most_recent_guess}\n---------------\n"	
 		print "\n#{@guessed_letters}\n\n"
+		puts @the_word
+	end
+	
+	def reset_game
+		@the_word = self.new_word
+		@game_over = false
+		@visible_word = ""
+		@guessed_this_turn = false
+		@failed_guesses = 0
+		@mr_hangman_array = ["    o ","\n   -","|","-","\n   /"," \\"]
+		@mr_hangman = ""
+		@guessed_letters = []
+		(@the_word.length-1).times{@visible_word << "_"}
 	end
 	
 	def player_turn		
@@ -54,8 +67,14 @@ class Game
 		
 		#if we have any non letters
 		if !@visible_word.include?("_")
-			@game_over=true
 			@game_over_message = "You are a winner!!!"
+			puts "Would you like to play again?"
+			replay_answer  = gets.chomp
+			if replay_answer.downcase == "y" || replay_answer.downcase == "yes"
+				self.reset_game
+			else
+				@game_over=true	
+			end
 			self.draw_board
 		end			
 	end
